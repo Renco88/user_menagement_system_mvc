@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const nodeMailar = require("nodemailer");
+require('dotenv').config();
 
 const loadRegister = async (req, res) => {
     try {
@@ -98,8 +99,61 @@ const veryfiMail = async (req, res) => {
     }
 };
 
+// login user methode 
+const loginLoad=async(req,res)=>{
+    try{
+
+        res.render('login');
+    }
+    catch(error){
+        console.log(error.message);
+
+    }
+}
+
+const verifyLogin = async (req, res) => {
+    try {
+        const email = req.body.email;
+        const password = req.body.password;
+
+        const userData = await User.findOne({ email: email });
+
+        if (userData) {
+            const passwordMatch = await bcrypt.compare(password, userData.password);
+            if (passwordMatch) {
+                if (userData.is_verified === 0) {
+                    res.render('login', { message: "Please verify your email." });
+                } else {
+                    req.session.user_id =userData._id;
+                    // Redirect or render the dashboard/homepage
+                    res.redirect('/home'); // Example: Redirecting to dashboard
+                }
+            } else {
+                res.render('login', { message: "Invalid credentials." });
+            }
+        } else {
+            res.render('login', { message: "Invalid credentials." });
+        }
+    } catch (error) {
+        console.error(error.message);
+    }
+};
+const loadHome = async(req,res)=>{
+    try{
+        res.render('home');
+
+    }
+    catch(error){
+        console.log(error.message);
+
+    }
+}
+
 module.exports = {
     loadRegister,
     insertUser,
-    veryfiMail
+    veryfiMail,
+    loginLoad,
+    verifyLogin,
+    loadHome
 };

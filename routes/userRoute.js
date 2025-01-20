@@ -3,6 +3,18 @@ const path = require("path");
 const multer = require("multer");
 const userRoute = express();
 
+const session = require("express-session");
+const config = require("../config/config");
+
+userRoute.use(
+    session({
+        secret: config.sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+const auth = require("../middleware/auth");
+
 const userController = require("../controllers/userController");
 
 // Configure view engine
@@ -21,8 +33,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Routes
-userRoute.get('/register', userController.loadRegister);
+userRoute.get('/register', auth.isLogOut, userController.loadRegister);
 userRoute.post('/register', upload.single('image'), userController.insertUser);
 userRoute.get('/verify', userController.veryfiMail);
+userRoute.get('/', auth.isLogOut, userController.loginLoad);
+userRoute.get('/login', auth.isLogOut, userController.loginLoad);
+userRoute.post('/login', userController.verifyLogin);
+userRoute.get('/home', auth.isLogin, userController.loadHome);
+
 
 module.exports = userRoute;
