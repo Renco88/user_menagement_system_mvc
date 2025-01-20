@@ -1,19 +1,28 @@
-const express= require("express");
-const user_route = express();
-
+const express = require("express");
 const path = require("path");
+const multer = require("multer");
+const userRoute = express();
 
-user_route.set('view engine', 'ejs');
-user_route.set('views', path.join(__dirname, '../views/users'));
+const userController = require("../controllers/userController");
 
+// Configure view engine
+userRoute.set('view engine', 'ejs');
+userRoute.set('views', path.join(__dirname, '../views/users'));
 
-user_route.get('/registration', (req, res) => {
-    res.render('users/registration');
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../public/userimages'));
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
 });
+const upload = multer({ storage: storage });
 
-const userController =require("../controllers/userController");
+// Routes
+userRoute.get('/register', userController.loadRegister);
+userRoute.post('/register', upload.single('image'), userController.insertUser);
+userRoute.get('/verify', userController.veryfiMail);
 
-user_route.get('/register',userController.loadRegister);
-
-
-module.exports=user_route;
+module.exports = userRoute;

@@ -18,5 +18,11 @@
         <br><br>
         <input type="submit" value="Register">
     </form>
+     <!-- Display message if it exists -->
+     <% if (typeof message !== "undefined") { %>
+        <p style="color: green;"><%= message %></p>
+    <% } %>
+
+    
 </body>
 </html>
